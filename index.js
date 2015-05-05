@@ -36,7 +36,7 @@ var Request = module.exports = (function() {
             data    = config.data || {},
             query;
 
-        _.extend( this, {
+        _.extend(this, {
             successCallback : config.success,
             errorCallback   : config.error,
             url             : config.url,
@@ -45,13 +45,13 @@ var Request = module.exports = (function() {
 
         // TODO: progress handler
         this.httpClient = Ti.Network.createHTTPClient({
-            onload  : _.partial( Request.prototype.handleSuccess, this ),
-            onerror : _.partial( Request.prototype.handleError, this ),
+            onload  : _.partial(Request.prototype.handleSuccess, this),
+            onerror : _.partial(Request.prototype.handleError, this),
             timeout : config.timeout || 10000
         });
 
-        if( method === 'GET' || method === 'DELETE' ) {
-            if( query = Request.prototype.toQueryString( config.data )) {
+        if(method === 'GET' || method === 'DELETE') {
+            if(query = Request.prototype.toQueryString(config.data)) {
                 this.url += (this.url.indexOf('?') > 0 ? '&' : '?') + query;
             }
         } else { // POST || PUT
@@ -59,15 +59,15 @@ var Request = module.exports = (function() {
         }
 
         var protocol = this.url.slice(0, 5);
-        if( protocol !== 'http:' && protocol !== 'https' ) {
+        if(protocol !== 'http:' && protocol !== 'https') {
             this.url = baseUrl + (this.url.charAt(0) !== '/' ? '/' : '') + this.url;
         }
 
-        this.httpClient.open( method, this.url );
+        this.httpClient.open(method, this.url);
 
-        if( config.headers ) {
-            for( type in config.headers ) {
-                this.httpClient.setRequestHeader( type, config.headers[type] );
+        if(config.headers) {
+            for(type in config.headers) {
+                this.httpClient.setRequestHeader(type, config.headers[type]);
             }
         }
 
@@ -81,37 +81,47 @@ var Request = module.exports = (function() {
         log.error(TAG, "(" + this.method + ") " + this.url);
         log.error(TAG, this.data);
     }
-
-    Request.prototype.handleSuccess = function( Request ) {
-        log.info( TAG, "handleSuccess for url " + "(" + Request.method + ") " + Request.url );
+    /**
+    * Handle request when it succeeds and call success custom callback.
+    * @private
+    * @param {appcelerator: HTTPClient} Request the request object
+    */
+    Request.prototype.handleSuccess = function(Request) {
+        log.info(TAG, "handleSuccess for url " + "(" + Request.method + ") " + Request.url);
         // Parse response
         var response;
         try {
             response = JSON.parse(this.responseText);
-        } catch ( e ) {
-            log.error( TAG, 'Tried to parse response, but it was not valid json.', e);
-            log.error( TAG, this.responseText );
+        } catch (e) {
+            log.error(TAG, 'Tried to parse response, but it was not valid json.', e);
+            log.error(TAG, this.responseText);
             response = this.responseText;
         }
         // Execute callback
-        if( typeof Request.successCallback === "function" ) {
-            Request.successCallback( response );
+        if(typeof Request.successCallback === "function") {
+            Request.successCallback(response);
         }
     };
-
-    Request.prototype.handleError = function( Request ) {
-        log.error( TAG, "handleError for url " + "(" + Request.method + ") " + Request.url );
-        log.error( TAG, this.responseText, Request );
+    /**
+    * Handle request when it fails and call error custom callback.
+    * @private
+    * @param {appcelerator: HTTPClient} Request the request object
+    */
+    Request.prototype.handleError = function(Request) {
+        log.error(TAG, "handleError for url " + "(" + Request.method + ") " + Request.url);
+        log.error(TAG, this.responseText, Request);
         // Execute callback
-        if( typeof Request.errorCallback === "function" ) {
-            Request.errorCallback( this.responseText )
+        if(typeof Request.errorCallback === "function") {
+            Request.errorCallback(this.responseText)
         }
     };
-
     /**
     * Converts the supplied object into a query string
+    * @private
+    * @param {Object} data Data object to be serialized
+    * @return {String} Serialized data
     */
-    Request.prototype.toQueryString = function( data ) {
+    Request.prototype.toQueryString = function(data) {
         var query = [],
             queryString = '',
             key;
