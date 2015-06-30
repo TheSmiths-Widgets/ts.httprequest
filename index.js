@@ -9,8 +9,7 @@
  *     new Request({ url, method, success, error });
  *
  */
-var log = require('libs/logController'),
-    TAG = "HTTPRequest";
+var TAG = "HTTPRequest";
 
 var Request = module.exports = (function() {
     /**
@@ -30,7 +29,7 @@ var Request = module.exports = (function() {
      */
     function Request(config) {
 
-        var baseUrl = Ti.App.Properties.getString('server-url'),
+        var baseUrl = config.baseUrl || 'http://',
             method  = config.method || 'GET',
             headers = config.headers || {},
             data    = config.data || {},
@@ -71,50 +70,63 @@ var Request = module.exports = (function() {
             }
         }
 
-        if(method != 'GET' && !_.isEmpty(this.data)) {
-            this.httpClient.send(this.data);
+        // Debug trace
+        Ti.API.warn(TAG, "(" + this.method + ") " + this.url);
+        Ti.API.warn(TAG, this.data);
+    }
+
+    /**
+     * Send the current request.
+     * @method function
+     * @param  {Object} data for everything but GET.
+     */
+    Request.prototype.send = function(data) {
+        Ti.API.info(TAG, "send for url " + "(" + this.method + ") " + this.url, this.data);
+        if(this.method != 'GET') {
+            data = data || this.data;
+            this.httpClient.send(data);
         } else {
             this.httpClient.send();
         }
-
-        // Debug trace
-        log.error(TAG, "(" + this.method + ") " + this.url);
-        log.error(TAG, this.data);
     }
+
     /**
     * Handle request when it succeeds and call success custom callback.
     * @private
     * @param {appcelerator: HTTPClient} Request the request object
     */
     Request.prototype.handleSuccess = function(Request) {
-        log.info(TAG, "handleSuccess for url " + "(" + Request.method + ") " + Request.url);
-        // Parse response
+        Ti.API.info(TAG, "handleSuccess for url " + "(" + Request.method + ") " + Request.url);
         var response;
         try {
             response = JSON.parse(this.responseText);
         } catch (e) {
-            log.error(TAG, 'Tried to parse response, but it was not valid json.', e);
-            log.error(TAG, this.responseText);
+            Ti.API.error(TAG, 'Tried to parse response, but it was not valid json.', e);
+            Ti.API.error(TAG, this.responseText);
             response = this.responseText;
         }
+
         // Execute callback
         if(typeof Request.successCallback === "function") {
             Request.successCallback(response);
         }
     };
+
     /**
     * Handle request when it fails and call error custom callback.
     * @private
     * @param {appcelerator: HTTPClient} Request the request object
     */
     Request.prototype.handleError = function(Request) {
-        log.error(TAG, "handleError for url " + "(" + Request.method + ") " + Request.url);
-        log.error(TAG, this.responseText, Request);
+        Ti.API.error(TAG, "handleError for url " + "(" + Request.method + ") " + Request.url);
+        Ti.API.error(TAG, this.responseText, Request);
+
         // Execute callback
         if(typeof Request.errorCallback === "function") {
             Request.errorCallback(this.responseText)
         }
     };
+
     /**
     * Converts the supplied object into a query string
     * @private
