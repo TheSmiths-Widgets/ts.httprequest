@@ -51,7 +51,7 @@ var Request = module.exports = (function() {
 
         if(method === 'GET' || method === 'DELETE') {
             if(query = Request.prototype.toQueryString(config.data)) {
-                this.url += (this.url.indexOf('?') > 0 ? '&' : '?') + query;
+                this.url += query;
             }
         } else { // POST || PUT
             this.data = JSON.stringify(config.data);
