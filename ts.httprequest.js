@@ -35,26 +35,32 @@ var Request = module.exports = (function() {
             data    = config.data || {},
             query;
 
-        _.extend(this, {
-            successCallback : config.success,
-            errorCallback   : config.error,
-            url             : config.url,
-            method          : method
+        Object.defineProperties(this, {
+            successCallback: { value: config.success, enumerable: true },
+            errorCallback: { value: config.error, enumerable: true },
+            url: { value: config.url, enumerable: true, writable: true },
+            method: { value: method, enumerable: true }
         });
 
         // TODO: progress handler
         this.httpClient = Ti.Network.createHTTPClient({
-            onload  : _.partial(Request.prototype.handleSuccess, this),
-            onerror : _.partial(Request.prototype.handleError, this),
+            onload  : (function (request) { return function () { 
+                Request.prototype.handleSuccess.call(this, request); };}(this)),
+            onerror : (function (request) { return function (error) {
+                Request.prototype.handleError.call(this, request, error); };}(this)),
             timeout : config.timeout || 10000
         });
 
         if(method === 'GET' || method === 'DELETE') {
             if(query = Request.prototype.toQueryString(config.data)) {
-                this.url += query;
+                this.url += "?" + query;
             }
         } else { // POST || PUT
-            this.data = JSON.stringify(config.data);
+            if (config.headers && config.headers['Content-Type'] === "application/x-www-form-urlencoded") {
+                this.data = Request.prototype.toQueryString(config.data); 
+            } else {
+                this.data = JSON.stringify(config.data);
+            }
         }
 
         var protocol = this.url.slice(0, 5);
@@ -69,10 +75,6 @@ var Request = module.exports = (function() {
                 this.httpClient.setRequestHeader(type, config.headers[type]);
             }
         }
-
-        // Debug trace
-        Ti.API.warn(TAG, "(" + this.method + ") " + this.url);
-        Ti.API.warn(TAG, this.data);
     }
 
     /**
@@ -80,13 +82,12 @@ var Request = module.exports = (function() {
      * @method function
      * @param  {Object} data for everything but GET.
      */
-    Request.prototype.send = function(data) {
+    Request.prototype.send = function() {
         Ti.API.info(TAG, "send for url " + "(" + this.method + ") " + this.url, this.data);
-        if(this.method != 'GET') {
-            data = data || this.data;
-            this.httpClient.send(data);
-        } else {
+        if (this.method === "GET") {
             this.httpClient.send();
+        } else {
+            this.httpClient.send(this.data);
         }
     }
 
@@ -97,13 +98,21 @@ var Request = module.exports = (function() {
     */
     Request.prototype.handleSuccess = function(Request) {
         Ti.API.info(TAG, "handleSuccess for url " + "(" + Request.method + ") " + Request.url);
-        var response;
-        try {
-            response = JSON.parse(this.responseText);
-        } catch (e) {
-            Ti.API.error(TAG, 'Tried to parse response, but it was not valid json.', e);
-            Ti.API.error(TAG, this.responseText);
-            response = this.responseText;
+        var response = this.responseText;
+
+        if (this.getResponseHeader("Content-Type").match(/application\/json/)) {
+            try {
+                response = JSON.parse(response);
+            } catch (e) {
+                Ti.API.error(TAG, 'Tried to parse response, but it was not valid json.');
+
+                // Execute callback
+                if(typeof Request.errorCallback === "function") {
+                    Request.errorCallback("Tried to parse response, but it was not valid json.");
+                }
+
+                return;
+            }
         }
 
         // Execute callback
@@ -117,13 +126,13 @@ var Request = module.exports = (function() {
     * @private
     * @param {appcelerator: HTTPClient} Request the request object
     */
-    Request.prototype.handleError = function(Request) {
+    Request.prototype.handleError = function(Request, error) {
         Ti.API.error(TAG, "handleError for url " + "(" + Request.method + ") " + Request.url);
-        Ti.API.error(TAG, this.responseText);
+        Ti.API.error(TAG, JSON.stringify(error, null, "\t"));
 
         // Execute callback
-        if(typeof Request.errorCallback === "function") {
-            Request.errorCallback(this.responseText)
+        if (typeof Request.errorCallback === "function") {
+            Request.errorCallback(error)
         }
     };
 
@@ -138,14 +147,13 @@ var Request = module.exports = (function() {
             queryString = '',
             key;
 
-        _.each(data, function(value, key) {
-            if(data.hasOwnProperty(key)) {
-                query.push(Ti.Network.encodeURIComponent(key) + '=' + Ti.Network.encodeURIComponent(data[key]));
-            }
-        });
+        for (key in data) {
+            query.push(Ti.Network.encodeURIComponent(key) + '=' + 
+                Ti.Network.encodeURIComponent(data[key]));
+        };
 
         if(query.length) {
-            queryString = '?' + query.join('&');
+            queryString = query.join('&');
         }
 
         return queryString;
