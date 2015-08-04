@@ -10,7 +10,7 @@ automatically parse the response and return a JSON object if the corresponding h
 
 ## Quick Start
 
-### Get it [![gitTio](http://gitt.io/badge.png)](http://gitt.io/component/ts.httprequest) [![npm](https://badge.fury.io/js/ts.httprequest.svg)](http://badge.fury.io/js/ts.httprequest)
+### Get it [![gitTio](http://gitt.io/badge.png)](http://gitt.io/component/ts.httprequest) 
 
 **Download this repository and install it**
 
@@ -27,8 +27,6 @@ automatically parse the response and return a JSON object if the corresponding h
 **Or use your favorite package manager** 
 
 - [gitTio](http://gitt.io/cli): `gittio install ts.httprequest`
-
-- [npm](https://npmjs.com): `npm install ts.httprequest`
 
 ### Use it
 
