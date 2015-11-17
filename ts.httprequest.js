@@ -131,6 +131,7 @@ var Request = module.exports = (function() {
     Request.prototype.handleError = function(Request, error) {
         Ti.API.error(TAG, "handleError for url " + "(" + Request.method + ") " + Request.url);
         Ti.API.error(TAG, JSON.stringify(error, null, "\t"));
+        Ti.API.error(TAG, this.responseText);
 
         // Execute callback
         if (typeof Request.errorCallback === "function") {
