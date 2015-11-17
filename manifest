@@ -2,11 +2,11 @@
 # this is your module manifest and used by Titanium
 # during compilation, packaging, distribution, etc.
 #
-version: 1.3.1
+version: 1.3.2
 description: ts.httprequest
 author: The Smiths [Pierre Van De Velde, Matthias Benkort]
-license: Apache
-copyright: Copyright (c) 2015 by Your Company
+license: Apache-2.0
+copyright: None
 
 # these should not be edited
 name: ts.httprequest
