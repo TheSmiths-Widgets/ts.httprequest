@@ -44,7 +44,7 @@ var Request = module.exports = (function() {
 
         // TODO: progress handler
         this.httpClient = Ti.Network.createHTTPClient({
-            onload  : (function (request) { return function () { 
+            onload  : (function (request) { return function () {
                 Request.prototype.handleSuccess.call(this, request); };}(this)),
             onerror : (function (request) { return function (error) {
                 Request.prototype.handleError.call(this, request, error); };}(this)),
@@ -57,9 +57,11 @@ var Request = module.exports = (function() {
             }
         } else { // POST || PUT
             if (config.headers && config.headers['Content-Type'] === "application/x-www-form-urlencoded") {
-                this.data = Request.prototype.toQueryString(config.data); 
-            } else {
+                this.data = Request.prototype.toQueryString(config.data);
+            } else if (config.headers && config.headers['Content-Type'] === "application/json") {
                 this.data = JSON.stringify(config.data);
+            } else {
+                this.data = config.data;
             }
         }
 
@@ -148,7 +150,7 @@ var Request = module.exports = (function() {
             key;
 
         for (key in data) {
-            query.push(Ti.Network.encodeURIComponent(key) + '=' + 
+            query.push(Ti.Network.encodeURIComponent(key) + '=' +
                 Ti.Network.encodeURIComponent(data[key]));
         };
 
