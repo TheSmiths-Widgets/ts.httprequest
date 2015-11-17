@@ -18,8 +18,10 @@ exec('mv ' + MODULE_INFO.NAME + '.js __save', function () {
             var destFolder = 'modules/commonjs/' + MODULE_INFO.NAME + '/' + MODULE_INFO.VERSION;
             exec('mkdir -p ' + destFolder + ' && cp manifest timodule.xml ' + MODULE_INFO.NAME + '.js ' + destFolder, function () {
                 exec('zip -r ' + MODULE_INFO.NAME + '-commonjs-' + MODULE_INFO.VERSION + '.zip ' + destFolder, function () {
-                    exec('rm -r modules __temp.js && mv __save ' + MODULE_INFO.NAME + '.js', function () {
-                        console.log("Build Successful!");
+                    exec('rm -r modules __temp.js', function() {
+                        exec('mv __save ' + MODULE_INFO.NAME + '.js', function () {
+                            console.log("Build Successful!");
+                        });
                     });
                 });
             });
