@@ -28,27 +28,17 @@ var Request = module.exports = (function() {
      * @param {String} config.error.responseText Server's text response (error).
      */
     function Request(config) {
-
         var baseUrl = config.baseUrl || 'http://',
             method  = config.method || 'GET',
             headers = config.headers || {},
             data    = config.data || {},
-            query;
+            query,
+            protocol;
 
         Object.defineProperties(this, {
-            successCallback: { value: config.success, enumerable: true },
-            errorCallback: { value: config.error, enumerable: true },
+            progressHandler: { value: config.progress, enumerable: true },
             url: { value: config.url, enumerable: true, writable: true },
             method: { value: method, enumerable: true }
-        });
-
-        // TODO: progress handler
-        this.httpClient = Ti.Network.createHTTPClient({
-            onload  : (function (request) { return function () {
-                Request.prototype.handleSuccess.call(this, request); };}(this)),
-            onerror : (function (request) { return function (error) {
-                Request.prototype.handleError.call(this, request, error); };}(this)),
-            timeout : config.timeout || 10000
         });
 
         if(method === 'GET' || method === 'DELETE') {
@@ -65,32 +55,39 @@ var Request = module.exports = (function() {
             }
         }
 
-        var protocol = this.url.slice(0, 5);
+        protocol = this.url.slice(0, 5);
         if(protocol !== 'http:' && protocol !== 'https') {
             this.url = baseUrl + (this.url.charAt(0) !== '/' ? '/' : '') + this.url;
         }
 
-        this.httpClient.open(method, this.url);
+        return new Promise((resolve, reject) => {
+            this.successCallback = resolve;
+            this.errorCallback = reject;
 
-        if(config.headers) {
-            for(type in config.headers) {
-                this.httpClient.setRequestHeader(type, config.headers[type]);
+            this.httpClient = Ti.Network.createHTTPClient({
+                onload: (function (request) { return function () {
+                    Request.prototype.handleSuccess.call(this, request); };}(this)),
+                onerror: (function (request) { return function (error) {
+                    Request.prototype.handleError.call(this, request, error); };}(this)),
+                onsendstream: (function (request) { return function (progress) {
+                    Request.prototype.handleProgress.call(this, request, progress); };}(this)),
+                timeout: config.timeout || 10000
+            });
+
+            this.httpClient.open(method, this.url);
+
+            if(config.headers) {
+                for(type in config.headers) {
+                    this.httpClient.setRequestHeader(type, config.headers[type]);
+                }
             }
-        }
-    }
 
-    /**
-     * Send the current request.
-     * @method function
-     * @param  {Object} data for everything but GET.
-     */
-    Request.prototype.send = function() {
-        Ti.API.info(TAG, "send for url " + "(" + this.method + ") " + this.url, this.data);
-        if (this.method === "GET") {
-            this.httpClient.send();
-        } else {
-            this.httpClient.send(this.data);
-        }
+            if (this.method === "GET") {
+                this.httpClient.send();
+            } else {
+                this.httpClient.send(this.data);
+            }
+        });
     }
 
     /**
@@ -135,7 +132,21 @@ var Request = module.exports = (function() {
 
         // Execute callback
         if (typeof Request.errorCallback === "function") {
-            Request.errorCallback(error)
+            Request.errorCallback(error);
+        }
+    };
+
+    /**
+    * Handle request sending stream, calls custom handler.
+    * @private
+    * @param {appcelerator: HTTPClient} Request the request object
+    */
+    Request.prototype.handleProgress = function(Request, event) {
+        Ti.API.error(TAG, "handleProgress for url " + "(" + Request.method + ") " + Request.url, event.progress);
+
+        // Execute handler
+        if (typeof Request.progressHandler === "function") {
+            Request.progressHandler(event.progress);
         }
     };
 
