@@ -42,16 +42,12 @@ var request = new HTTPRequest({
     headers: {
         key: 'value'
     },
-    success: function onSuccess(response) { ... },
-    error: function onError(error) { ... }
-});
-
-request.send();
+}).then(handleSuccess).catch(handleError);
 ```
 
 ### API
 
-##### new HTTPRequest(config) :: request
+##### new HTTPRequest(config) :: Promise
 
 > *Create a new request ready to be sent*
 >
@@ -61,17 +57,16 @@ request.send();
 >   - `{Object}` **[config.headers={}]** defines request's headers
 >   - `{Object}` **[config.data={}]** defines request's data
 >   - `{Number}` **[config.timeout=10000]** defines request's timeout (ms)
->   - `{Function}` **config.success** success callback  
->       - `{Mixed}` **config.success.response** Server's response. Object or String.
->   - `{Function}` **config.error** error callback
->       - `String` **config.error.msg** Server error message.
-> - **return** `{Request}` A request instance
+>   - `{Function}` **config.success** progress callback 
+>   
+> - **return** `{Promise}` A Promise resolved with the request response (formatted)
 
-##### request.send()
-
-> *Send the corresponding request*
 
 ## Changelog
+* 1.4 Upgrade
+    - An es6-promise is now returned by the constructor
+    - A `progress` option is now available as a callback to handle progress
+
 * 1.3 Upgrade
     - Mainly fixes and refactor in the code 
     - Remove the dependency to underscore
