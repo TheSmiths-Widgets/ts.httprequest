@@ -1,24 +1,35 @@
 {
   "name": "ts.httprequest",
-  "version": "1.3.2",
+  "version": "1.4.0",
   "description": "simple abstractions and methods to common HTTP operations.",
   "main": "ts.httprequest.js",
+  "babel": {
+    "presets": [
+      "es2015"
+    ]
+  },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "build:browserify": "browserify -s $npm_package_name *.js -o dist/$npm_package_name.js",
-    "build:uglify": "uglify -s dist/*.js -o dist/$npm_package_name.js",
+    "build:babel": "babel --presets es2015 dist/ -d dist/",
+    "build:browserify": "browserify -s $npm_package_name $npm_package_name.js -o dist/$npm_package_name.js",
+    "build:uglify": "uglify -s dist/$npm_package_name.js -o dist/$npm_package_name.js",
     "build:timodule": "echo '<?xml version=\"1.0\" encoding=\"UTF-8\"?><ti:module xmlns:ti=\"http://ti.appcelerator.org\" xmlns:android=\"http://schemas.android.com/apk/res/android\"></ti:module>' > dist/timodule.xml",
     "build:manifest": "cp manifest dist/manifest",
     "dist:prepare": "mkdir -p modules/commonjs/$npm_package_name",
     "dist:move": "mv dist modules/commonjs/$npm_package_name/$npm_package_version",
     "dist:zip": "zip -r $npm_package_name-commonjs-$npm_package_version.zip modules",
     "prebuild": "mkdir -p dist",
-    "build": "npm run build:browserify && npm run build:uglify && npm run build:timodule && npm run build:manifest",
+    "build": "npm run build:browserify && npm run build:babel && npm run build:uglify && npm run build:timodule && npm run build:manifest",
     "postbuild": "npm run dist:prepare && npm run dist:move && npm run dist:zip && rm -r modules"
   },
+  "dependencies": {
+    "core-js": "^1.2.6"
+  },
   "devDependencies": {
-    "uglify": "^0.1.15",
-    "browserify": "^11.0.0"
+    "babel": "^6.1.18",
+    "babel-cli": "^6.1.18",
+    "babel-preset-es2015": "^6.1.18",
+    "browserify": "^11.0.0",
+    "uglify": "^0.1.5"
   },
   "repository": {
     "type": "git",
