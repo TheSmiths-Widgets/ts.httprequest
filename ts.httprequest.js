@@ -1,3 +1,5 @@
+require('core-js/es6/promise');
+
 /**
  * @class Request
  * **Request library** creates and handles HTTP request using Titanium's HTTPClient.
