@@ -144,10 +144,9 @@ var Request = module.exports = (function() {
     * @param {appcelerator: HTTPClient} Request the request object
     */
     Request.prototype.handleProgress = function(Request, event) {
-        Ti.API.error(TAG, "handleProgress for url " + "(" + Request.method + ") " + Request.url, event.progress);
-
         // Execute handler
         if (typeof Request.progressHandler === "function") {
+            Ti.API.info(TAG, "handleProgress for url " + "(" + Request.method + ") " + Request.url, event.progress);
             Request.progressHandler(event.progress);
         }
     };
