@@ -79,7 +79,7 @@ var Request = module.exports = (function() {
             this.httpClient.open(method, this.url);
 
             if(config.headers) {
-                for(type in config.headers) {
+                for(let type in config.headers) {
                     this.httpClient.setRequestHeader(type, config.headers[type]);
                 }
             }
