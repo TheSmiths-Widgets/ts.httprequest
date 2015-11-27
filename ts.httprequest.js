@@ -1,4 +1,4 @@
-require('core-js/es6/promise');
+require('pinkie');
 
 /**
  * @class Request

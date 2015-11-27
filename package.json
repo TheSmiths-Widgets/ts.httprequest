@@ -1,6 +1,6 @@
 {
   "name": "ts.httprequest",
-  "version": "1.4.1",
+  "version": "1.4.2",
   "description": "simple abstractions and methods to common HTTP operations.",
   "main": "ts.httprequest.js",
   "babel": {
@@ -22,7 +22,7 @@
     "postbuild": "npm run dist:prepare && npm run dist:move && npm run dist:zip && rm -r modules"
   },
   "dependencies": {
-    "core-js": "^1.2.6"
+    "pinkie": "^2.0.1"
   },
   "devDependencies": {
     "babel": "^6.1.18",
