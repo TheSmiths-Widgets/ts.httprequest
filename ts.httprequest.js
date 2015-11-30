@@ -1,4 +1,4 @@
-require('pinkie');
+var Promise = require('pinkie');
 
 /**
  * @class Request
