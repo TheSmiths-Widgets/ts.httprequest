@@ -1,6 +1,6 @@
 {
   "name": "ts.httprequest",
-  "version": "1.4.2",
+  "version": "1.4.3",
   "description": "simple abstractions and methods to common HTTP operations.",
   "main": "ts.httprequest.js",
   "babel": {
