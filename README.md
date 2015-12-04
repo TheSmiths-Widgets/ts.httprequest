@@ -42,6 +42,7 @@ var request = new HTTPRequest({
     headers: {
         key: 'value'
     },
+    progress: progressHandler
 }).then(handleSuccess).catch(handleError);
 ```
 
@@ -57,7 +58,7 @@ var request = new HTTPRequest({
 >   - `{Object}` **[config.headers={}]** defines request's headers
 >   - `{Object}` **[config.data={}]** defines request's data
 >   - `{Number}` **[config.timeout=10000]** defines request's timeout (ms)
->   - `{Function}` **config.success** progress callback 
+>   - `{Function}` **config.progress** progress callback 
 >   
 > - **return** `{Promise}` A Promise resolved with the request response (formatted)
 
